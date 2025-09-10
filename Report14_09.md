@@ -1,4 +1,8 @@
-# Report Title
+# Course: Advanced Data Analysis and Machine Learning
+Level A2 (30p) Future predictions of silica content. Part
+Team members: *Maksim Kovalevskii, Emilie Ledoussal, Jakob Pflugbeil*
+Report 1: Data summary and visualization
+Date: 14-09-2025
 ## Section 1
 - First Item
 - Second Item
