@@ -6,7 +6,7 @@
 1. Step one
 2. Step two
 
-## Table 1  
+### Table 1  
 | Column 1 | Column 2 |
 |----------|----------|
 | Value 1  | Value 2  |
