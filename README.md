@@ -31,3 +31,8 @@ Breakdown of the points:
     3p         -  exploratory data analysis with PCA: explain variable correlations and visualize the PCs using biplots, loading plots; (! only on the X matrix - we are not looking at the response variable now)
     0.5p     – identification of pretreatment steps, and a plan on how to do data pretreatment
 
+-We established communication, with a Teams group, and this Github repository to share our code.
+-We dowloaded, imported and used the csv file in both of our scripts
+-We analyzed the data prior to the use of PCA, in the script polished_up_data_analysing to determine the challenges
+-We went through PCA in PCA.py 
+-We identified in the reports pretreatments of the steps
