@@ -16,8 +16,8 @@
 
 
 ## Visualization and comment on the dataset
-![Variable 2 (Iron conc. In feed [%]) distribution](Images/Var2Iron.jpg) 
-![Variable 5 (Amina flow) distribution](Images/Var5Amina.jpg) 
+![Variable 2 (Iron conc. In feed [%]) distribution](Images/Var2Iron.png) 
+![Variable 5 (Amina flow) distribution](Images/Var5Amina.png) 
 
 Due to the challenges discussed, distribution of variables 2,3 tends to be Gaussian with unexpected peaks in the end (var. 2) and beginning (var.3) of the values range. Impactful variables 4-7 seem not to have problems in the values distribution. Impactful variable 8 (*Ore pulp density*) as well as variable 12 has a suspicious peak in the beginning of the range, variable 13 – in the end of the range. 
 
@@ -25,7 +25,7 @@ Due to the challenges discussed, distribution of variables 2,3 tends to be Gauss
 PCA was implemented via Python (PCA.py). Number of principal components to reach 95% explained variance is 16 with RMSE equal to 0.045.
 **Biplots?? explain variable correlations and visualize the PCs using biplots, loading plots DON’T KNOW WHAT TO WRITE HERE**
 
-![Variable 3 (Silica conc. In feed [%]) - Original and Reconstructed data](Images/pcavar3.jpg)
+![Variable 3 (Silica conc. In feed [%]) - Original and Reconstructed data](Images/pcavar3.png)
 
 Variable 3 (Silica conc. In feed [%]) - Original and Reconstructed data
 
