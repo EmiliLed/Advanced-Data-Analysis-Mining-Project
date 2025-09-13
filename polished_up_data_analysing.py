@@ -4,6 +4,8 @@ import seaborn as sns
 from datetime import datetime
 import numpy as np
 import scipy as sp
+from sklearn.preprocessing import StandardScaler
+
 now = datetime.now()
 print("Current timestamp:", now)
 
@@ -29,8 +31,46 @@ def data_cleaning(df):
     return
 def detrmin_data_distribuntion():
     return
-def convert_to_time_series():
-    return
+def convert_to_time_series_mean_std():
+    # dates cleaned
+    df = pd.read_csv("MiningProcess_Flotation_Plant_Database.csv")
+    df.iloc[:, 1:] = df.iloc[:, 1:].apply(pd.to_numeric, errors='coerce').astype(float)
+    df = pd.to_numeric(df.str.replace(',', '.'), errors='coerce')
+    # dates cleaned
+    #df = pd.read_csv("mining_process%m_03_11_40_05.csv")
+    df_help = df.copy()
+    df_dates = pd.read_csv("mining_process_dates_sorted.csv")
+    keys_normal = df.keys()[1:]
+    new_keys = [f'{i}_mean' for i in keys_normal]
+    new_keys_ = [f'{i}_std' for i in keys_normal]
+    new_keys = np.concatenate((new_keys, new_keys_))
+    print(new_keys)
+    df_new = df_dates
+    for col in new_keys:
+        df_new[col] = np.nan
+    cols_to_update = df_new.columns[2:]
+    for i in df_new['dates']:
+        if df_new[df_new['dates'] == i]["counts"].values[0] == 0:
+            continue
+        matching_rows = df[df['date'] == i]
+        # print(matching_rows.iloc[:, 1:])
+        matching_rows_ = matching_rows.iloc[:, 1:]
+        means = matching_rows_.mean()
+        stds = matching_rows_.std()
+        means.index = [f"{col}_mean" for col in means.index]
+        stds.index = [f"{col}_std" for col in stds.index]
+        summary_row = pd.concat([means, stds])
+        list_keys = summary_row.index.to_list
+        index = df_new[df_new['dates'] == i].index
+        # help_value=summary_row.index()
+        for k in new_keys:
+            df_new.loc[index, k] = summary_row.loc[k]
+
+    df_help = df_new
+    print(df_new.iloc)
+    printing = False
+    if printing:
+        df_help.to_csv("mining_process_means" + now.strftime("%m_%d_%H_%M_%S") + '.csv', index=False)
 
 def plot_df(df):
     return
@@ -133,6 +173,19 @@ def data_visuliying_each_column(df_in,keys,distribution=True, boxplot=False,corr
         plt.xticks(rotation=45)
         plt.legend(loc='best', bbox_to_anchor=(1.05, 1), fontsize='small')
         plt.show()
+def vis_corrL(df):
+        print(df)
+        print(df.dtypes)
+        plt.figure(figsize=(10, 6))
+        co_mtx = df.corr(numeric_only=True)
+        # Print correlation matrix
+        print(co_mtx)
+        sns.heatmap(co_mtx, cmap="YlGnBu", annot=False,center=0)
+        plt.xticks([])
+        plt.tight_layout()
+        plt.show()
+        print(co_mtx.iloc[:,-1])
+
 
 def expiriment_test(df):
     df['Sum_Last_Two'] = df.iloc[:, -2] +df.iloc[:, -1]
@@ -186,28 +239,87 @@ def find_redunant_ranges(df,key):
         i += 1
     print(f"Indices where next {n} values are the same as current value:")
     print(indices)
+def lagged_data_correlation_single_column(df):
+    df = df.select_dtypes(include='number')
 
+    # Lags to check
+    max_lag = 200
+    lags = range(1, max_lag + 1)
+
+    # Plot
+    plt.figure(figsize=(12, 6))
+
+    for column in df.columns:
+        autocorrs = [df[column].autocorr(lag=lag) for lag in lags]
+        plt.plot(lags, autocorrs, label=f'{column}')
+    plt.title('Autocorrelation for Lags 1 to 200')
+    plt.xlabel('Lag')
+    plt.ylabel('Autocorrelation')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+def lagged_data_correlation_multi_column(df):
+    columns = df.columns
+
+    max_lag = 1000
+    lags = range(1, max_lag + 1)
+
+    special_key=df.keys()[-1]
+    col2=special_key
+    for col1 in df.columns:
+        corr_values = []
+        for lag in lags:
+            shifted = df[col1].shift(lag)
+            corr = shifted.corr(df[col2])
+            corr_values.append(corr)
+
+        # Plot
+        plt.figure(figsize=(10, 4))
+        plt.plot(lags, corr_values, label=f'{col1} (lagged) vs {col2}', color='slateblue')
+        plt.axhline(0, linestyle='--', color='gray')
+        plt.xlabel('Lag')
+        plt.ylabel('Correlation')
+        plt.title(f'Lagged Cross-Correlation: {col1} (t-lag) → {col2} (t)')
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+    col1 = special_key
+    for col2 in df.columns:
+        corr_values = []
+        for lag in lags:
+            shifted = df[col1].shift(lag)
+            corr = shifted.corr(df[col2])
+            corr_values.append(corr)
+
+        # Plot
+        plt.figure(figsize=(10, 4))
+        plt.plot(lags, corr_values, label=f'{col1} (lagged) vs {col2}', color='slateblue')
+        plt.axhline(0, linestyle='--', color='gray')
+        plt.xlabel('Lag')
+        plt.ylabel('Correlation')
+        plt.title(f'Lagged Cross-Correlation: {col1} (t-lag) → {col2} (t)')
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
 
 def plottin_floating_Average(df,key,n=1000):
     df_1=df.copy()
-    print(df_1[key])
-
     df_2= df_1[key].rolling(window=n, center=True).mean()
-    print(df_2)
-    return
+    #df_2=df_2.dropna()
     plt.figure(figsize=(10, 5))
     plt.plot(df[key], label='Original', marker='o')
-    plt.plot(df_2['moving_avg'], label=f'{n}-Point Moving Avg', linestyle='--', color='orange')
+    plt.plot(df_2, label=f'{n}-Point Moving Avg', linestyle='--', color='orange')
 
     plt.title(f'Moving Average (Window = {n})')
     plt.xlabel('Index')
-    plt.ylabel('Value')
+    plt.ylabel(key)
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
     plt.show()
 if __name__=="__main__":
-    df_= load_initial_data()
+    """"df_= load_initial_data()
     df_.iloc[:, 1:] = df_.iloc[:, 1:].replace(',', '.', regex=True).astype(float)
     nan_counts = df_.isna().sum()
     df=df_.copy()
@@ -225,6 +337,22 @@ if __name__=="__main__":
     #data_visuliying_each_column(df.iloc[:, 1:],df.keys()[1:],distribution=False, boxplot=False, correlation=True, spectral=False)
     #func_visulized_df(df.iloc[:, 1:],df.keys()[1:])
     find_redunant_ranges(df, "% Iron Feed")
-    plottin_floating_Average(df,"Flotation Column 05 Air Flow")
+    for k in df.keys()[1:]:
+        plottin_floating_Average(df,k)
+        print(k)
+        find_redunant_ranges(df, k)
     #look_for_data_impurities(df_)
-    #plot_df(df_)
+    #plot_df(df_)"""
+    df = pd.read_csv("mining_process_means09_09_10_07_21.csv")
+    #func_visulized_df(df,df.keys()[1:])
+    df_help=df.iloc[:, 2:25].copy()
+    df_help=df_help.dropna()
+    scaler = StandardScaler()
+    rescaled_data = scaler.fit_transform(df_help)
+    df_standardized = pd.DataFrame(rescaled_data, columns=df_help.columns)
+    print(df_standardized)
+    #vis_corrL(df_standardized)
+    lagged_data_correlation_multi_column(df_standardized)
+
+
+
