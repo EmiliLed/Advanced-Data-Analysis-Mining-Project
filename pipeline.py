@@ -65,7 +65,7 @@ def testing_timeseries_(x,model,x_columns,number_lags=9,name_y="% Silica Concent
         return y_pred_array
 
 
-def model_testing(X_train,X_test,y_train,y_test,max_components_Lv,simple=True,model=None):
+def model_testing(X_train,X_test,y_train,y_test,max_components_Lv,name_block,simple=True,model=None):
     x_col = X_test.columns
     X_train_std, X_mean, X_std = PLS.standardize(X_train.values)
     Y_train_std, Y_mean, Y_std = PLS.standardize(np.asarray(y_train).reshape(-1, 1))
@@ -90,7 +90,7 @@ def model_testing(X_train,X_test,y_train,y_test,max_components_Lv,simple=True,mo
     plt.title('PLS Regression: Actual vs Predicted')
     plt.grid()
     plt.show()
-
+    print_res(y_test,y_pred_array,name_block=name_block)
     #Model evaluation
     mse = mean_squared_error(Y_test_std, y_pred_array)
     r2 = r2_score(Y_test_std, y_pred_array)
@@ -98,6 +98,17 @@ def model_testing(X_train,X_test,y_train,y_test,max_components_Lv,simple=True,mo
     print(f'R² Score: {r2}')
     return pls,(X_mean,X_std),(Y_mean,Y_std)
 
+def print_res(y,y_predic, name_block):  # Plot residuals
+    residuals = y - y_predic
+    plt.figure(figsize=(8, 5))
+    plt.plot(range(len(y)), residuals, color='blue', label='Residuals')
+    plt.axhline(y=0, color='red', linestyle='--', label='Zero Error Line')
+    plt.title(f'Residual Plot for block {name_block}')
+    plt.xlabel('Observation')
+    plt.ylabel(f'Residuals ')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 def execute_modelling():
     # Hyperparamters
@@ -192,10 +203,21 @@ def execute_testing():
     Y_train = pd.concat([df2_lagged_y, df3_lagged_y], ignore_index=True)
     X_test_1 = pd.concat([df4_lagged_x, df1_lagged_x], ignore_index=True)
     Y_test_1 = pd.concat([df4_lagged_y, df1_lagged_y], ignore_index=True)
-    #model_testing(X_train,df4_lagged_x,Y_train,df4_lagged_y,max_components_Lv,simple=False)
-    #model_testing(X_train, df1_lagged_x, Y_train, df1_lagged_y, max_components_Lv, simple=False)
-    model_testing(X_train,X_test_1,Y_train,Y_test_1,max_components_Lv)
+    #model_testing(X_train,df4_lagged_x,Y_train,df4_lagged_y,max_components_Lv,name_block="4"
+    #model_testing(X_train, df1_lagged_x, Y_train, df1_lagged_y, max_components_Lv,name_block="1")
+    model_testing(X_train,X_test_1,Y_train,Y_test_1,max_components_Lv, name_block="4 and 1")
 
+def ploting_bar(input,title): #[[x],[y]]
+    fig, ax = plt.subplots()
+    plt.figure(figsize=(12, 6))
+    ax.bar(input[0], input[1])
+
+
+    ax.set_title(title)
+    ax.set_ylabel('Scores')
+    plt.tight_layout()
+    plt.show()
 if __name__=='__main__':
     #execute_modelling()
     execute_testing()
+
